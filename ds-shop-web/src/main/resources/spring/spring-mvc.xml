@@ -1,0 +1,136 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd 
+		http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc.xsd 
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context.xsd 
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop.xsd 
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx.xsd ">
+
+
+
+	<!-- 导入需要扫描的配置 -->
+	<import resource="classpath*:**/spring/spring-ctrl-*.xml" />
+
+	<!--注解映射器 -->
+	<!-- <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"/> -->
+	<!--注解适配器 -->
+	<!-- <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"/> -->
+
+	<!-- 使用 mvc:annotation-driven代替上边注解映射器和注解适配器配置 mvc:annotation-driven默认加载很多的参数绑定方法， 
+		比如json转换解析器就默认加载了，如果使用mvc:annotation-driven不用配置上边的RequestMappingHandlerMapping和RequestMappingHandlerAdapter 
+		实际开发时使用mvc:annotation-driven -->
+	<!-- <mvc:annotation-driven conversion-service="conversionService"></mvc:annotation-driven> -->
+
+	<mvc:annotation-driven>
+		<mvc:message-converters register-defaults="false">
+			<!-- 避免IE执行AJAX时,返回JSON出现下载文件 -->
+			<bean id="fastJsonHttpMessageConverter"
+				class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<!-- 这里顺序不能反，一定先写text/html,不然ie下出现下载提示 -->
+						<value>text/html;charset=UTF-8</value>
+						<value>application/json;charset=UTF-8</value>
+					</list>
+				</property>
+			</bean>
+		</mvc:message-converters>
+
+	</mvc:annotation-driven>
+
+	<!-- 文件上传配置 -->
+
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="defaultEncoding" value="utf-8" />
+		<property name="maxUploadSize" value="10485760000" />
+		<property name="maxInMemorySize" value="40960" />
+	</bean>
+	<!-- 静态资源访问配置 -->
+	<mvc:resources location="/resources/" mapping="/resources/**" />
+	<mvc:resources location="/resources/" mapping="/ocx/**" />
+	<mvc:resources location="/resources/" mapping="/swf/**" />
+	<!-- <mvc:resources location="/topui/" mapping="/topui/**" /> -->
+
+	<!-- 这里配置的是freemarker -->
+	<bean id="freemarkerConfig"
+		class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+		<property name="freemarkerSettings" ref="freemarkerConfiguration" />
+		<property name="templateLoaderPath" value="/views/" />
+	</bean>
+
+	<!-- 设置freeMarker的配置文件路径 -->
+	<bean id="freemarkerConfiguration"
+		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="location" value="classpath:/common/freemarker.properties" />
+	</bean>
+
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+		<!-- 其中的exposeRequestAttributes exposeSessionAttributes两个属性都被设置为true。 结果是请求和会话属性都被复制到模板的属性集中，可以使用FreeMarker的表达式语言来访问并显示 
+			使用这些宏，必须设置FreeMarkerViewResolver的exposeSpringMacroHelpers属性为true -->
+		<!-- <property name="exposeRequestAttributes" value="true" /> <property 
+			name="exposeSessionAttributes" value="true" /> -->
+		<property name="viewClass">
+			<value>org.springframework.web.servlet.view.freemarker.FreeMarkerView
+			</value>
+		</property>
+		<!-- <property name="viewNames" value="*.html" /> -->
+		<property name="contentType" value="text/html; charset=utf-8" />
+		<property name="cache" value="true" />
+		<property name="requestContextAttribute" value="request" />
+		<!--这里需要注意一下，我注释了下面这样一行代码，这行代码的意思就是指引freemarker需要解析的文件的位置。注释掉原因是因为 applicationContext.xml里有这样一行代码：<property 
+			name="templateLoaderPath" value="/WEB-INF/views/" /> 已经指定了视图位置。如果我们这里依然保留下方代码，页面回报406的找不到的错误 -->
+		<property name="suffix">
+			<value>.html</value>
+		</property>
+		<property name="order" value="0" />
+		 <property name="attributesMap" ref="freemarkerStaticModels"/>
+		
+	</bean>
+	
+	 <!-- freemarker 静态类的解析配置-->
+    <bean id="freemarkerStaticModels" 
+        class="com.dscomm.portal.ctrl.FreemarkerStaticModels" factory-method="getInstance">
+        <property name="staticModels" ref="freemarkerStaticModelsProps"/>
+    </bean>
+    
+	<bean id="freemarkerStaticModelsProps"  
+         class="org.springframework.beans.factory.config.PropertiesFactoryBean">  
+       <property name="location" value="classpath:/common/javastatic.properties" />  
+   </bean>  
+   
+    
+    
+	<!-- 视图解析器 解析jsp解析，默认使用jstl标签，classpath下的得有jstl的包 -->
+	<!-- <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"> 
+		配置jsp路径的前缀 <property name="prefix" value="/WEB-INF/" /> 配置jsp路径的后缀 <property 
+		name="suffix" value=".jsp" /> <property name="order" value="1" /> </bean> -->
+
+	<!-- SpringMVC在超出上传文件限制时，会抛出org.springframework.web.multipart.MaxUploadSizeExceededException -->
+	<!-- 该异常是SpringMVC在检查上传的文件信息时抛出来的，而且此时还没有进入到Controller方法中 -->
+	<bean id="exceptionResolver"
+		class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<props>
+				<!-- 遇到MaxUploadSizeExceededException异常时，自动跳转到/WEB-INF/jsp/error_fileupload.jsp页面 -->
+				<prop
+					key="org.springframework.web.multipart.MaxUploadSizeExceededException">error_fileupload</prop>
+
+			</props>
+		</property>
+	</bean>
+
+	<!-- 自定义参数绑定 -->
+	<!-- <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean"> 
+		转换器 <property name="converters"> <list> 日期类型转换 <bean class="cn.itcast.ssm.controller.converter.CustomDateConverter" 
+		/> </list> </property> </bean> -->
+
+</beans>

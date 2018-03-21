@@ -1,0 +1,182 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd 		
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context.xsd 
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop.xsd 
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx.xsd 
+		http://www.springframework.org/schema/data/jpa
+    http://www.springframework.org/schema/data/jpa/spring-jpa-1.8.xsd"
+	default-lazy-init="true">
+	<context:component-scan base-package="com.dscomm.portal.svc"></context:component-scan>
+	<context:component-scan base-package="com.dscomm.portal.bl"></context:component-scan>
+
+	<jpa:repositories base-package="com.dscomm.portal.dal"
+		entity-manager-factory-ref="entityManagerFactory"
+		transaction-manager-ref="transactionManager" />
+
+	<!-- 加载db.properties文件中的内容，db.properties文件中key命名要有一定的特殊规则 -->
+	<!-- <context:property-placeholder
+		ignore-unresolvable="true" location="classpath:db.properties" /> -->
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+		<property name="ignoreResourceNotFound" value="true" />
+		<property name="locations">
+			<list>
+				<value>classpath:db.properties</value>	
+				<value>classpath:redis.properties</value>
+				<!-- <value>classpath:activemq.properties</value> -->			
+			</list>
+		</property>
+	</bean>
+	<!-- 配置数据源 ，dbcp -->
+
+	<!-- 基于Druid数据库链接池的数据源配置 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<!-- 基本属性driverClassName、 url、user、password -->
+		<property name="driverClassName" value="${jdbc.driver}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<!-- 配置初始化大小、最小、最大 -->
+		<!-- 通常来说，只需要修改initialSize、minIdle、maxActive -->
+		<property name="initialSize" value="${jdbc.initialSize}" />
+		<property name="minIdle" value="4" />
+		<property name="maxActive" value="50" />
+		<!-- <property name="testWhileIdle" value="${jdbc.testWhileIdle}" /> -->
+		<property name="validationQuery" value="select 1 FROM DUAL" />
+		<property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false" />		
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="50000" />
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒，该值要比'wait_timeout'的值小 -->
+		<!-- 可以通过sql命令show variables like 'wait_timeout' 看到mysql的 wait_timeout时间是28800-->
+		<property name="minEvictableIdleTimeMillis" value="30100" />
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="10000" />
+		<!-- 解密密码必须要配置的项 -->
+		<!-- <property name="filters" value="stat,log4j" /> -->
+		<property name="connectionProperties" value="config.decrypt=true" />
+	</bean>
+	<!-- JPA实体管理工厂的配置 -->
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="jpaVendorAdapter" ref="hibernateJpaVendorAdapter" />
+		<property name="packagesToScan" value="com.dscomm.portal.po" /><!--待扫描的实体类包，不再需要persistence.xml了 -->
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.ejb.naming_strategy">org.hibernate.cfg.ImprovedNamingStrategy</prop>
+				<!-- <prop key="hibernate.show_sql">true</prop> -->
+				<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+				
+				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
+				<prop key="hibernate.default_schema">${hibernate.default_schema}</prop>
+				<prop key="hibernate.generate_statistics">${hibernate.generate_statistics}</prop>
+				<!-- create 每次加载hibernate时都会删除上一次的生成的表，然后根据你的model类再重新来生成新表，哪怕两次没有任何改变也要这样执行 -->
+				<!-- <prop key="hibernate.hbm2ddl.auto">create</prop> -->
+				<!-- create-drop 每次加载hibernate时根据model类生成表，但是sessionFactory一关闭,表就自动删除。 -->
+				<!-- <prop key="hibernate.hbm2ddl.auto">create-drop</prop> -->
+				<!-- update 第一次加载hibernate时根据model类会自动建立起表的结构（前提是先建立好数据库），以后加载hibernate时根据 model类自动更新表结构，即使表结构改变了但表中的行仍然存在不会删除以前的行。要注意的是当部署到服务器后，表结构是不会被马上建立起来的，是要等 应用第一次运行起来后才会 -->
+				<!-- <prop key="hibernate.hbm2ddl.auto">update</prop> -->
+				<!-- validate  每次加载hibernate时，验证创建数据库表结构，只会和数据库中的表进行比较，不会创建新表，但是会插入新值 -->
+				<!-- <prop key="hibernate.hbm2ddl.auto">validate </prop> -->
+				<!-- none 不做任何操作 -->
+				
+				<prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+				<prop key="hibernate.enable_lazy_load_no_trans">true</prop>
+			</props>
+		</property>
+	</bean>
+	<!--指定实现JPA的适配器 -->
+	<!-- <bean id="hibernateJpaVendorAdapter"
+		class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+		<property name="databasePlatform" value="org.hibernate.dialect.MySQLDialect" />
+	</bean> -->
+	<bean id="hibernateJpaVendorAdapter"
+		class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+		<property name="generateDdl" value="true" />
+		<property name="database" value="ORACLE" />
+		<property name="databasePlatform" value="${hibernate.dialect}" />
+	</bean>
+	<!-- Jpa 事务配置 -->
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+	<!-- 使用annotation定义事务 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	
+	<bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<property name="maxIdle" value="${redis.maxIdle}" />
+		<property name="maxTotal" value="${redis.maxActive}" />
+		<property name="maxWaitMillis" value="${redis.maxWait}" />
+		<property name="testOnBorrow" value="${redis.testOnBorrow}" />
+	</bean>
+
+<!-- multi redis-server start -->
+<!-- 
+	<bean id="sentinelConfig"
+        class="org.springframework.data.redis.connection.RedisSentinelConfiguration"> 
+        <constructor-arg name="master" value="mymaster" />
+        <constructor-arg name="sentinelHostAndPorts">
+            <set>
+                <value>${redis.sentinel1}</value>
+                <value>${redis.sentinel2}</value>
+                <value>${redis.sentinel3}</value>
+            </set>
+        </constructor-arg>
+    </bean>
+
+    <bean id="connectionFactory" 
+        class="org.springframework.data.redis.connection.jedis.DS_JedisConnectionFactory">
+        <constructor-arg ref="sentinelConfig" />
+        <constructor-arg ref="poolConfig" />
+    </bean>
+-->
+<!-- multi redis-server end -->
+
+<!-- single redis-server start -->
+
+	<bean id="connectionFactory"
+		class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+		<property name="poolConfig" ref="poolConfig" />
+		<property name="port" value="${redis.port}" />
+		<property name="hostName" value="${redis.host}" />
+		<property name="timeout" value="${redis.timeout}" />
+	</bean>
+
+<!-- single redis-server end -->
+
+	<bean id="redisTemplateJSON" class="org.springframework.data.redis.core.RedisTemplate">
+		<property name="connectionFactory" ref="connectionFactory" />
+		<property name="keySerializer" >
+			<bean
+				class="org.springframework.data.redis.serializer.StringRedisSerializer"></bean>
+		</property>
+		<property name="valueSerializer">
+			<bean
+				class="org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer"></bean>
+
+		</property>
+	</bean>
+	
+	<bean id="redisTemplateString" class="org.springframework.data.redis.core.RedisTemplate">
+		<property name="connectionFactory" ref="connectionFactory" />
+		<property name="keySerializer" >
+			<bean
+				class="org.springframework.data.redis.serializer.StringRedisSerializer"></bean>
+		</property>
+		<property name="valueSerializer">
+			<bean
+				class="org.springframework.data.redis.serializer.StringRedisSerializer"></bean>
+		</property>
+	</bean>
+</beans>
