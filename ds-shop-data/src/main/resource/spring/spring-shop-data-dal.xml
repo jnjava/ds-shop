@@ -30,7 +30,7 @@
 		<property name="ignoreResourceNotFound" value="true" />
 		<property name="locations">
 			<list>
-				<value>classpath:db.properties</value>
+				<value>classpath:dev/db.properties</value>
 				<!-- <value>classpath:redis.properties</value> -->
 				<!-- <value>classpath:activemq.properties</value> -->
 			</list>
@@ -49,12 +49,12 @@
 		<!-- 配置初始化大小、最小、最大 -->
 		<!-- 通常来说，只需要修改initialSize、minIdle、maxActive -->
 		<property name="initialSize" value="${jdbc.initialSize}" />
-		<property name="minIdle" value="4" />
+		<property name="minIdle" value="${jdbc.minIdle}" />
 		<property name="maxActive" value="50" />
 		<!-- <property name="testWhileIdle" value="${jdbc.testWhileIdle}" /> -->
 		<property name="validationQuery" value="select 1 FROM DUAL" />
-		<property name="testOnBorrow" value="false" />
-		<property name="testOnReturn" value="false" />
+		<property name="testOnBorrow" value="${jdbc.testOnBorrow}" />
+		<property name="testOnReturn" value="${jdbc.testOnReturn}" />
 		<!-- 配置获取连接等待超时的时间 -->
 		<property name="maxWait" value="50000" />
 		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒，该值要比'wait_timeout'的值小 -->
@@ -105,8 +105,8 @@
 		/> </bean> -->
 	<bean id="hibernateJpaVendorAdapter"
 		class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
-		<property name="generateDdl" value="true" />
-		<property name="database" value="ORACLE" />
+		<property name="generateDdl" value="${jpa.generateDdl}" />
+		<property name="database" value="${jpa.database}" />
 		<property name="databasePlatform" value="${hibernate.dialect}" />
 	</bean>
 	<!-- Jpa 事务配置 -->
