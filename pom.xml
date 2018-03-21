@@ -17,5 +17,6 @@
 	</properties>
 	<modules>
 		<module>ds-shop-web</module>
+		<module>ds-shop-data</module>
 	</modules>
 </project>
