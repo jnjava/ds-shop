@@ -33,8 +33,7 @@ public class StoreTest {
 	@Autowired
 	private StoreRepository storeRepo;
 	
-	@Test
-	@Transactional
+	@Test	
 	public void SaveStore()
 	{
 		Store store = new Store();
@@ -45,8 +44,16 @@ public class StoreTest {
 		store.setStart_date(new Date());
 		store.setDutyer_name("负责人");
 		store.setCoordinate("100000000,20000000");
-		store = storeRepo.save(store);
+		storeRepo.save(store);
+		 
 		System.out.print(JSON.toJSONString(store));
+	}
+	
+	@Test
+	public void GetStoreOne()
+	{
+		Iterable<Store> storeList = storeRepo.findAll();
+		System.out.print(JSON.toJSONString(storeList));
 	}
 	
 	@Test
