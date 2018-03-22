@@ -14,9 +14,11 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.dacomm.shop.data.po.Store;
+import com.alibaba.fastjson.JSON;
 import com.dscomm.shop.data.dal.StoreRepository;
+import com.dscomm.shop.data.po.Store;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:spring/spring-shop-*.xml")
@@ -32,6 +34,7 @@ public class StoreTest {
 	private StoreRepository storeRepo;
 	
 	@Test
+	@Transactional
 	public void SaveStore()
 	{
 		Store store = new Store();
@@ -42,8 +45,8 @@ public class StoreTest {
 		store.setStart_date(new Date());
 		store.setDutyer_name("负责人");
 		store.setCoordinate("100000000,20000000");
-		storeRepo.save(store);
-		
+		store = storeRepo.save(store);
+		System.out.print(JSON.toJSONString(store));
 	}
 	
 	@Test

@@ -1,4 +1,4 @@
-package com.dacomm.shop.data.po;
+package com.dscomm.shop.data.po;
 
 import java.util.Date;
 
@@ -20,7 +20,7 @@ public class Store {
 	@Id
 	@GeneratedValue(generator="system-uuid")  
 	@GenericGenerator(name="system-uuid",strategy="uuid")
-	@Column(name = "YHID", nullable = false)
+	@Column(name = "id", nullable = false)
 	private String id;
 	
 	@Column(name = "name", nullable = false, length = 50)
