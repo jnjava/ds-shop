@@ -26,15 +26,15 @@ import com.dscomm.shop.data.po.Store;
 		 DependencyInjectionTestExecutionListener.class,
 		 TransactionalTestExecutionListener.class
 		})
-public class StoreTest {
+public class GoodsTest {
 
-	private static final Log logger = LogFactory.getLog(StoreTest.class);
+	private static final Log logger = LogFactory.getLog(GoodsTest.class);
 	
 	@Autowired
 	private StoreRepository storeRepo;
 	
 	@Test	
-	public void SaveStore()
+	public void SaveGoods()
 	{
 		Store store = new Store();
 		store.setName("1号店");
@@ -50,7 +50,7 @@ public class StoreTest {
 	}
 	
 	@Test
-	public void GetStoreOne()
+	public void GetGoodsOne()
 	{
 		Iterable<Store> storeList = storeRepo.findAll();
 		System.out.print(JSON.toJSONString(storeList));

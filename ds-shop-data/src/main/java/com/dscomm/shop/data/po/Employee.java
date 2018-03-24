@@ -15,11 +15,11 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "shop_employee")
+@GenericGenerator(name="system-uuid",strategy="uuid")
 public class Employee {
 
 	@Id
-	@GeneratedValue(generator="system-uuid")  
-	@GenericGenerator(name="system-uuid",strategy="uuid")
+	@GeneratedValue(generator="system-uuid")  	
 	@Column(name = "id", nullable = false)
 	private String id;
 	
