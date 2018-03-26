@@ -1,11 +1,15 @@
 package com.dscomm.shop.data.po;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -13,17 +17,18 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Data;
 
 @Data
 @Entity
 @Table(name = "shop_goods_category")
+@GenericGenerator(name = "system-uuid", strategy = "uuid")
 public class Category {
 
 	@Id
 	@GeneratedValue(generator = "system-uuid")
-	@GenericGenerator(name = "system-uuid", strategy = "uuid")
 	@Column(name = "id", nullable = false)
 	private String id;
 
@@ -46,7 +51,13 @@ public class Category {
 	private String store_id;
 
 	// 一对多:集合Set
-	@OneToMany(mappedBy = "goods_category_id", orphanRemoval = true)
-	private Set<Goods> goods = new HashSet<Goods>();
+	/** 
+     * OneToMany:一对多的配置 
+     * mappedBy="order":指定由多的一方的order属性维护关联关系 
+     * 
+     */  
+	@JsonIgnoreProperties(value = { "goods" })
+	@OneToMany(cascade = { CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE },fetch=FetchType.LAZY,mappedBy = "category")
+	private List<Goods> goods;
 
 }
