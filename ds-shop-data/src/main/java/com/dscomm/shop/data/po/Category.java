@@ -12,6 +12,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -47,8 +49,6 @@ public class Category {
 	@Column(name = "is_valid", nullable = true)
 	private String is_valid;
 
-	@Column(name = "store_id", nullable = true)
-	private String store_id;
 
 	// 一对多:集合Set
 	/** 
@@ -59,5 +59,11 @@ public class Category {
 	@JsonIgnoreProperties(value = { "goods" })
 	@OneToMany(cascade = { CascadeType.ALL},fetch=FetchType.LAZY,mappedBy = "category")
 	private List<Goods> goods;
+	
+	@JsonIgnoreProperties(value = { "store" })
+	@ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+	@JoinColumn(name = "store_id") 
+	private Store store;
+	
 
 }

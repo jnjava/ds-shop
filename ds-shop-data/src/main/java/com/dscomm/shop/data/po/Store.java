@@ -21,11 +21,11 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "shop_store")
+@GenericGenerator(name = "system-uuid", strategy = "uuid")
 public class Store {
 
 	@Id
-	@GeneratedValue(generator = "system-uuid")
-	@GenericGenerator(name = "system-uuid", strategy = "uuid")
+	@GeneratedValue(generator = "system-uuid")	
 	@Column(name = "id", nullable = false)
 	private String id;
 
@@ -61,5 +61,9 @@ public class Store {
 	@JsonIgnoreProperties(value = { "goods" })
 	@OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY, mappedBy = "store")
 	private List<Goods> goods;
+	
+	@JsonIgnoreProperties(value = { "employees" })
+	@OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY, mappedBy = "store")
+	private List<Employee> employees;
 
 }

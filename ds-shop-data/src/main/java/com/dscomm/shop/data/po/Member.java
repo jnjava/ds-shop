@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -22,9 +23,9 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "shop_employee")
+@Table(name = "shop_member")
 @GenericGenerator(name="system-uuid",strategy="uuid")
-public class Employee {
+public class Member {
 
 	@Id
 	@GeneratedValue(generator="system-uuid")  	
@@ -34,23 +35,17 @@ public class Employee {
 	@Column(name = "name", nullable = false, length = 50)
 	private String name;
 	
-	@Column(name = "sex", nullable = true)
-	private int sex;
+	@Column(name = "grade", nullable = true)
+	private int grade;
 	
-	@Column(name = "workno", nullable = true, length = 50)
-	private String workno;
+	@Column(name = "money", nullable = true, length = 50)
+	private double money;
 	
-	@Column(name = "password", nullable = true, length = 50)
-	private String password;
+	@Column(name = "create_date", nullable = true)
+	private Date create_date;
 	
-	@Column(name = "salary", nullable = true, length = 50)
-	private double salary;
-	
-	@Column(name = "entry_date", nullable = true)
-	private Date entry_date;
-	
-	@Column(name = "idcard_no", nullable = true, length = 200)
-	private String idcard_no;
+	@Column(name = "phone", nullable = true, length = 200)
+	private String phone;
 	
 	@Column(name = "is_valid", nullable = true)
 	private int isvalid;
@@ -60,8 +55,14 @@ public class Employee {
 	@JoinColumn(name = "store_id") 
 	private Store store;
 	
-	@JsonIgnoreProperties(value = { "members" })
-	@OneToMany(cascade = { CascadeType.REFRESH }, fetch = FetchType.LAZY, mappedBy = "employee")
-	private List<Member> members;;
 	
+	@JsonIgnoreProperties(value = { "carts" })
+	@OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY, mappedBy = "member")
+	private List<Cart> carts;
+	
+
+	@JsonIgnoreProperties(value = { "employee" })
+	@ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH })
+	@JoinColumn(name = "employee_id") 
+	private Employee employee;
 }

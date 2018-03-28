@@ -15,6 +15,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ import com.dscomm.shop.data.dal.GoodsRepository;
 import com.dscomm.shop.data.po.Category;
 import com.dscomm.shop.data.po.Goods;
 import com.dscomm.shop.data.po.Store;
+
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:spring/spring-shop-*.xml")
@@ -42,7 +44,7 @@ public class GoodsTest {
 	@Test
 	public void SaveGoods() {
 		Store store = new Store();
-		store.setName("1号店");
+		store.setName("2号店");
 		store.setAddress("乌鲁木齐北京路40号");
 		store.setCall_number("18654214230");
 		store.setManager_name("经理");
@@ -65,6 +67,8 @@ public class GoodsTest {
 		goods.setRetail_price(12.00);
 		goods.setScore(100);
 		goods.setCategory(category);
+		
+		goods.setStore(store);
 
 		category.setIcon_url("/category/icon");
 		category.setName("蔬菜");
@@ -80,6 +84,7 @@ public class GoodsTest {
 
 	@Test
 	public void SaveGategoryAndGoodsList() {
+
 
 		Store store = new Store();
 		store.setName("1号店");
@@ -110,11 +115,11 @@ public class GoodsTest {
 		goods.setRemark("备注");
 		goods.setRetail_price(12.00);
 		goods.setScore(100);
+		
 		goods.setCategory(category);
 		goods.setStore(store);
 		
 		goodsList.add(goods);
-
 		category.setGoods(goodsList);
 		store.setGoods(goodsList);
 		// gategoryRepo.save(category);
@@ -123,12 +128,14 @@ public class GoodsTest {
 
 		// Category category1= gategoryRepo.findOne(category.getId());
 		System.out.print(JSON.toJSONString(category));
+
 	}
 
 	@Test
 	public void GetGoodsOne() {
+
 		Iterable<Goods> goodsList = goodsRepo.findAll();
-		// System.out.print(JSON.toJSONString(goodsList));
+
 	}
 
 	@Test

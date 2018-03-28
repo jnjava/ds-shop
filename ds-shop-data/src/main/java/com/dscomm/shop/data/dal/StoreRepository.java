@@ -5,5 +5,5 @@ import org.springframework.data.repository.CrudRepository;
 import com.dscomm.shop.data.po.Store;
 
 public interface StoreRepository extends CrudRepository<Store,String>{
-
+	public Store findByName(String name);
 }
